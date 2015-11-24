@@ -87,8 +87,7 @@ public class FlaxPicker extends Script implements MessageListening07 {
                     }
                     break;
 
-                case Constants.STATUS_DEATH_RECOVER:
-                    walkTo(Constants.flaxTile);
+                case Constants.STATUS_DEATH_RECOVER:                    walkTo(Constants.flaxTile);
                     currentStatus = Constants.STATUS_GATHER_FLAX;
                     break;
 

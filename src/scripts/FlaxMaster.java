@@ -7,7 +7,7 @@ import org.tribot.script.interfaces.Painting;
 
 import java.awt.*;
 
-@ScriptManifest(authors = { "Zope, tsh, Xuubasa" }, category = "DMM-Flax", name = "Master")
+@ScriptManifest(authors = { "Zope, tsh, Xuubasa" }, category = "DMM-Flax", name = "FlaxMaster")
 public class FlaxMaster extends Script implements Painting, Ending {
     @Override
     public void onEnd() {
