@@ -1,4 +1,4 @@
-package scripts;
+package src.scripts;
 
 import org.tribot.script.Script;
 import org.tribot.script.ScriptManifest;
