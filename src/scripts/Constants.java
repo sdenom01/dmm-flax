@@ -7,10 +7,6 @@ import org.tribot.api2007.types.RSTile;
  * Created by Shane on 11/24/2015.
  */
 public class Constants {
-    //TODO: These need actual values.
-    public static final int bowStringId = 1777;
-    public static final int notedBowStringId = 1778;
-
 
     /* Object Ids */
     public static final int spinningLadderBottom = 25938;
@@ -38,7 +34,7 @@ public class Constants {
     public static final RSArea seersVillageArea = new RSArea(new RSTile(2662, 3511), new RSTile(2785, 3435));
     public static final RSArea lumbridgeArea = new RSArea(new RSTile(3191, 3196), new RSTile(3246, 3241));
     public static final RSArea spinningArea = new RSArea(new RSTile(2714, 3469, 1), new RSTile(2710, 3473, 1));
-    public static final RSArea lowerSpinningArea = new RSArea(new RSTile(2710, 3473, 0), new RSTile(2714, 3471, 0));
+    public static final RSArea lowerSpinningArea = new RSArea(new RSTile(2715, 3471, 0), new RSTile(2714, 3470, 0));
 
     /* Corresponding integer identifiers for Areas */
     public static final int bankAreaInt = 1;
@@ -50,4 +46,7 @@ public class Constants {
 
     /* Item Ids */
     public static final int flaxId = 1779;
+    public static final int bowStringId = 1777;
+    public static final int notedBowStringId = 1778;
+
 }

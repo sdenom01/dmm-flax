@@ -1,5 +1,6 @@
 package scripts;
 
+import com.sun.tools.internal.jxc.ap.Const;
 import org.tribot.api.Clicking;
 import org.tribot.api.DynamicClicking;
 import org.tribot.api.General;
@@ -13,6 +14,7 @@ import org.tribot.api2007.util.PathNavigator;
 import org.tribot.script.Script;
 import org.tribot.script.ScriptManifest;
 import org.tribot.script.interfaces.MessageListening07;
+import scripts.*;
 
 import java.awt.*;
 
@@ -98,6 +100,7 @@ public class FlaxPicker extends Script implements MessageListening07 {
 
                 case Constants.STATUS_TRADE_MASTER:
                     if (tradeMaster()) {
+                        General.println("finished trading master");
                         currentStatus = Constants.STATUS_GATHER_FLAX;
                     }
                     break;
@@ -209,22 +212,28 @@ public class FlaxPicker extends Script implements MessageListening07 {
     /**
      * Notes bowstrings in inventory, assumes player is located near a bank.
      */
-    public void noteBowStrings() {
+    public boolean noteBowStrings() {
         General.println("noting bowstrings");
         RSItem[] bowStrings = Inventory.find(Constants.bowStringId);
-        General.println(bowStrings);
-        General.println(locatePlayer());
-        if(locatePlayer() == 1 && bowStrings.length > 0) {
-            General.println("we're in seers bank");
+
+//        if(locatePlayer() == 1 && bowStrings.length > 0) {
+//            General.println("we're in seers bank");
             // exchange bowstrings
             RSObject[] nearestBankBooth = Objects.findNearest(15, 25808);
             withdrawBowstrings(nearestBankBooth);
-        } else if(bowStrings.length == 0) {
-            // run to flax fields
-            walkTo(Constants.flaxTile);
-        } else if(locatePlayer() != 1) {
-            // run to bank
-            walkTo(Constants.bankTile);
+//        } else if(bowStrings.length == 0) {
+//            // run to flax fields
+//            walkTo(Constants.flaxTile);
+//        } else if(locatePlayer() != 1) {
+//            // run to bank
+//            walkTo(Constants.bankTile);
+//        }
+        RSItem[] notedBowStrings = Inventory.find(Constants.notedBowStringId);
+        if (notedBowStrings.length == 0) {
+            withdrawBowstrings(nearestBankBooth);
+            return false;
+        } else {
+            return true;
         }
     }
 
@@ -232,10 +241,10 @@ public class FlaxPicker extends Script implements MessageListening07 {
     /**
      * Withdraws noted bowstrings from bank.
      */
-    private static void withdrawBowstrings(RSObject[] bankBooth) {
+    public boolean withdrawBowstrings(RSObject[] bankBooth) {
         General.println("withdrawBowstrings");
         Clicking.click("Bank Bank booth", bankBooth[0]);
-
+        General.random(500, 800);
         Timing.waitCondition(new Condition() {
             @Override
             public boolean active() {
@@ -243,20 +252,29 @@ public class FlaxPicker extends Script implements MessageListening07 {
             }
         }, 5000);
 
-        General.sleep(500);
-        if (Inventory.getAll().length > 0) {
+        General.random(500, 800);
+        if (Inventory.find(Constants.bowStringId).length > 0) {
             Banking.depositAll();
+            General.sleep(400, 500);
         }
 
         RSItem[] notedBowStrings = Inventory.find(Constants.notedBowStringId);
-        if (notedBowStrings.length < 1) {
+        if (notedBowStrings.length == 0) {
             // note items
             Clicking.click(Interfaces.get(12, 24));
+            General.sleep(400, 500);
             Banking.withdraw(0, Constants.bowStringId);
+            return true;
         }
 
         General.sleep(400, 500);
-        Banking.close();
+        if (notedBowStrings.length > 1) {
+            Banking.close();
+            General.sleep(400, 500);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -265,12 +283,20 @@ public class FlaxPicker extends Script implements MessageListening07 {
      * @return
      */
     public boolean tradeMaster() {
+        General.println("trade master");
+        if (Banking.isBankScreenOpen()) {
+            Banking.close();
+        }
+        if (Inventory.find(Constants.bowStringId).length > 0) {
+            noteBowStrings();
+        }
+
         // define mule names
         String accountNames = "zsh";
         RSPlayer[] mule = Players.findNearest(accountNames);
         RSPlayer[] all = Players.getAll();
         RSItem[] notedBowStrings = Inventory.find(Constants.notedBowStringId);
-
+        boolean tradeComplete = false;
         if (all.length > 0) {
             for (RSPlayer r : all) {
                 if (r != null) {
@@ -287,6 +313,8 @@ public class FlaxPicker extends Script implements MessageListening07 {
                                 }
                                 if (Trading.getWindowState() == Trading.WINDOW_STATE.SECOND_WINDOW && accountNames.contains(Trading.getOpponentName())) {
                                     Trading.accept();
+                                    General.sleep(1000,5000);
+                                    tradeComplete = true;
                                 }
                             } else {
                                 if (Player.getPosition().distanceTo(r) > 5) {
@@ -298,8 +326,7 @@ public class FlaxPicker extends Script implements MessageListening07 {
                 }
             }
         }
-        
-        return true;
+        if (tradeComplete) { return true; } else { return false; }
     }
 
     /**
@@ -345,7 +372,7 @@ public class FlaxPicker extends Script implements MessageListening07 {
         // target is moving, and you need to click the target.
 
         if (!Inventory.isFull()) {
-            if (!DynamicClicking.clickRSObject(flaxes[0], "Pick"))
+            if (!Clicking.click("Pick", flaxes[0]))
                 return false;
             else
                 sleep(750, 1250);
@@ -364,7 +391,9 @@ public class FlaxPicker extends Script implements MessageListening07 {
         println("Starting to spin flax...");
         RSObject[] spinningWheel = Objects.findNearest(20, Constants.spinningWheel);
         if (spinningWheel.length > 0) {
-            DynamicClicking.clickRSModel(spinningWheel[0].getModel(), "Spin");
+//            Clicking.click("Spin", spinningWheel[0].getModel());
+//            sleep(500, 750);
+
             //Window Pops up
             if (spinningWheel[0].click("Spin")) {
 
@@ -384,8 +413,8 @@ public class FlaxPicker extends Script implements MessageListening07 {
                 sleep(500, 750);
 
                 if (bowStringInterface[0] != null)
-                    bowStringInterface[0].click("Make X");
-
+                    Clicking.click("Make X", bowStringInterface[0]);
+                General.random(500, 800);
                 Timing.waitCondition(new Condition() {
                     @Override
                     public boolean active() {
@@ -396,7 +425,7 @@ public class FlaxPicker extends Script implements MessageListening07 {
                     }
                 }, 5000);
 
-                sleep(500, 750);
+                sleep(950, 1250);
 
                 Keyboard.typeSend("" + General.random(28, 99));
                 sleep(750, 1250);
