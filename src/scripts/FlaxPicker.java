@@ -1,6 +1,5 @@
 package scripts;
 
-import com.sun.tools.internal.jxc.ap.Const;
 import org.tribot.api.Clicking;
 import org.tribot.api.DynamicClicking;
 import org.tribot.api.General;
@@ -14,7 +13,6 @@ import org.tribot.api2007.util.PathNavigator;
 import org.tribot.script.Script;
 import org.tribot.script.ScriptManifest;
 import org.tribot.script.interfaces.MessageListening07;
-import scripts.*;
 
 import java.awt.*;
 
@@ -77,7 +75,7 @@ public class FlaxPicker extends Script implements MessageListening07 {
                 case Constants.STATUS_SPIN_FLAX:
                     if (!Constants.spinningArea.contains(Player.getRSPlayer())) {
                         walkTo(Constants.spinningDoorTile);
-                        openDoorIfClosed(Objects.findNearest(20, Constants.spinningDoor));
+                        openDoorIfClosed(Constants.spinningDoor);
                         walkTo(Constants.spinLadderTile);
                         useLadder(Constants.spinningLadderBottom, "Climb-up", Constants.spinningArea);
                     } else {
@@ -86,18 +84,20 @@ public class FlaxPicker extends Script implements MessageListening07 {
 
                     if (spinFlax()) {
                         useLadder(Constants.spinningLadderTop, "Climb-down", Constants.lowerSpinningArea);
-                        openDoorIfClosed(Objects.findNearest(20, Constants.spinningDoor));
+                        openDoorIfClosed(Constants.spinningDoor);
                         walkTo(Constants.bankTile);
                         currentStatus = Constants.STATUS_NOTE_BOWSTRINGS;
                     }
                     break;
 
                 case Constants.STATUS_NOTE_BOWSTRINGS:
-                    if (Constants.seersBankArea.contains(Player.getRSPlayer())) {
+                    if (!Constants.seersBankArea.contains(Player.getRSPlayer())) {
                         walkTo(Constants.bankTile);
                     }
+
                     noteBowStrings();
-                    currentStatus = Constants.STATUS_TRADE_MASTER;
+                    // TODO: Set this currentStatus = Constants.STATUS_TRADE_MASTER;
+                    currentStatus = Constants.STATUS_GATHER_FLAX;
                     break;
 
                 case Constants.STATUS_TRADE_MASTER:
@@ -215,28 +215,32 @@ public class FlaxPicker extends Script implements MessageListening07 {
      * Notes bowstrings in inventory, assumes player is located near a bank.
      */
     public boolean noteBowStrings() {
-        General.println("noting bowstrings");
-        RSItem[] bowStrings = Inventory.find(Constants.bowStringId);
-
-//        if(locatePlayer() == 1 && bowStrings.length > 0) {
-//            General.println("we're in seers bank");
-            // exchange bowstrings
+        // TODO: Uncomment this stuff..
+//        General.println("noting bowstrings");
+//        RSItem[] bowStrings = Inventory.find(Constants.bowStringId);
+//
+////        if(locatePlayer() == 1 && bowStrings.length > 0) {
+////            General.println("we're in seers bank");
+//            // exchange bowstrings
             RSObject[] nearestBankBooth = Objects.findNearest(15, 25808);
-            withdrawBowstrings(nearestBankBooth);
-//        } else if(bowStrings.length == 0) {
-//            // run to flax fields
-//            walkTo(Constants.flaxTile);
-//        } else if(locatePlayer() != 1) {
-//            // run to bank
-//            walkTo(Constants.bankTile);
+//            withdrawBowstrings(nearestBankBooth);
+////        } else if(bowStrings.length == 0) {
+////            // run to flax fields
+////            walkTo(Constants.flaxTile);
+////        } else if(locatePlayer() != 1) {
+////            // run to bank
+////            walkTo(Constants.bankTile);
+////        }
+//        RSItem[] notedBowStrings = Inventory.find(Constants.notedBowStringId);
+//        if (notedBowStrings.length == 0) {
+//            withdrawBowstrings(nearestBankBooth);
+//            return false;
+//        } else {
+//            return true;
 //        }
-        RSItem[] notedBowStrings = Inventory.find(Constants.notedBowStringId);
-        if (notedBowStrings.length == 0) {
-            withdrawBowstrings(nearestBankBooth);
-            return false;
-        } else {
-            return true;
-        }
+
+        depositAllFlax(nearestBankBooth);
+        return true;
     }
 
 
@@ -245,20 +249,7 @@ public class FlaxPicker extends Script implements MessageListening07 {
      */
     public boolean withdrawBowstrings(RSObject[] bankBooth) {
         General.println("withdrawBowstrings");
-        Clicking.click("Bank Bank booth", bankBooth[0]);
-        General.random(500, 800);
-        Timing.waitCondition(new Condition() {
-            @Override
-            public boolean active() {
-                return Banking.isBankScreenOpen();
-            }
-        }, 5000);
-
-        General.random(500, 800);
-        if (Inventory.find(Constants.bowStringId).length > 0) {
-            Banking.depositAll();
-            General.sleep(400, 500);
-        }
+        depositAllFlax(bankBooth);
 
         RSItem[] notedBowStrings = Inventory.find(Constants.notedBowStringId);
         if (notedBowStrings.length == 0) {
@@ -276,6 +267,23 @@ public class FlaxPicker extends Script implements MessageListening07 {
             return true;
         } else {
             return false;
+        }
+    }
+
+    private void depositAllFlax(RSObject[] bankBooth) {
+        Clicking.click("Bank Bank booth", bankBooth[0]);
+        General.sleep(500, 800);
+        Timing.waitCondition(new Condition() {
+            @Override
+            public boolean active() {
+                return Banking.isBankScreenOpen();
+            }
+        }, 5000);
+
+        General.sleep(500, 800);
+        if (Inventory.find(Constants.bowStringId).length > 0) {
+            Banking.depositAll();
+            General.sleep(400, 500);
         }
     }
 
@@ -521,12 +529,20 @@ public class FlaxPicker extends Script implements MessageListening07 {
     }
 
     public void openDoorIfClosed(int doorId) {
-        RSObject[] door = Objects.findNearest(20, doorId);
-        while(door.length > 0) {
-            DynamicClicking.clickRSModel(door[0].getModel(), "Open");
-            sleep(200, 300);
-            door = Objects.findNearest(20, doorId);
+        RSObject[] door = Objects.findNearest(5, doorId);
+
+        if (door.length != 0) {
+            while (door.length > 0 && door.length != 0) {
+                DynamicClicking.clickRSModel(door[0].getModel(), "Open");
+                sleep(200, 300);
+                door = Objects.findNearest(5, doorId);
+                println("Door closed");
+            }
+        } else {
+            println("No door found!");
         }
+
+        println("Door open");
     }
 
 }

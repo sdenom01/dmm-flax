@@ -12,7 +12,7 @@ public class Constants {
     public static final int spinningLadderBottom = 25938;
     public static final int spinningLadderTop = 25939;
     public static final int spinningWheel = 25824;
-    public static final int spinningDoor = 916;
+    public static final int spinningDoor = 1536;
 
     /* Slave Status Ids */
     public static final int STATUS_INIT = 1;
