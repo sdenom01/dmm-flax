@@ -76,13 +76,13 @@ public class FlaxPicker extends Script implements MessageListening07 {
                     PathNavigator navi = new PathNavigator();
                     if (!Constants.spinningArea.contains(Player.getRSPlayer())) {
                         navi.traverse(Constants.spinLadderTile);
-                        useLadder(Constants.spinningLadder, "Climb-up", Constants.spinningArea);
+                        useLadder(Constants.spinningLadderBottom, "Climb-up", Constants.spinningArea);
                     } else {
                         println("In spinning area...");
                     }
 
                     if (spinFlax()) {
-                        useLadder(Constants.spinningLadder, "Climb-down", Constants.lowerSpinningArea);
+                        useLadder(Constants.spinningLadderTop, "Climb-down", Constants.lowerSpinningArea);
                         navi.traverse(Constants.bankTile);
                         currentStatus = Constants.STATUS_NOTE_BOWSTRINGS;
                     }
