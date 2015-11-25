@@ -1,4 +1,4 @@
-package src.scripts;
+package scripts;
 
 import org.tribot.api.DynamicClicking;
 import org.tribot.api.General;
@@ -19,7 +19,7 @@ import java.awt.*;
 @ScriptManifest(authors = {"Xuubasa, Zope, tsh"}, name = "FlaxPicker", category = "DMM-Flax", version = 1.0, description = "Picks Flax and spins it into bowstrings in seers village before noting and trading to 'mule' bot.")
 public class FlaxPicker extends Script implements MessageListening07 {
 
-    int currentStatus = 0;
+    int currentStatus = 1;
 
     @Override
     public void serverMessageReceived(String s) {
@@ -54,7 +54,8 @@ public class FlaxPicker extends Script implements MessageListening07 {
     @Override
     public void run() {
 
-        while(currentStatus != Constants.STATUS_QUIT) {
+        while (currentStatus != Constants.STATUS_QUIT) {
+            println("Current Status: " + currentStatus);
             switch (currentStatus) {
 
                 case Constants.STATUS_INIT:
@@ -62,10 +63,10 @@ public class FlaxPicker extends Script implements MessageListening07 {
                     break;
 
                 case Constants.STATUS_GATHER_FLAX:
-                    if(!Constants.seersFlaxArea.contains(Player.getRSPlayer())) {
+                    if (!Constants.seersFlaxArea.contains(Player.getRSPlayer())) {
                         walkTo(Constants.flaxTile);
                     }
-                    if(gatherFlax()) {
+                    if (gatherFlax()) {
                         currentStatus = Constants.STATUS_SPIN_FLAX;
                     }
                     break;
@@ -76,6 +77,7 @@ public class FlaxPicker extends Script implements MessageListening07 {
                         navi.traverse(Constants.spinLadderTile);
                         useLadder(Constants.spinningLadder, "Climb-up", Constants.spinningArea);
                     }
+
                     if(spinFlax()) {
                         useLadder(Constants.spinningLadder, "Climb-down", Constants.lowerSpinningArea);
                         navi.traverse(Constants.bankTile);
@@ -84,7 +86,7 @@ public class FlaxPicker extends Script implements MessageListening07 {
                     break;
 
                 case Constants.STATUS_NOTE_BOWSTRINGS:
-                    if(Constants.seersBankArea.contains(Player.getRSPlayer())) {
+                    if (Constants.seersBankArea.contains(Player.getRSPlayer())) {
                         walkTo(Constants.bankTile);
                     }
                     noteBowStrings();
@@ -92,12 +94,13 @@ public class FlaxPicker extends Script implements MessageListening07 {
                     break;
 
                 case Constants.STATUS_TRADE_MASTER:
-                    if(tradeMaster()) {
+                    if (tradeMaster()) {
                         currentStatus = Constants.STATUS_GATHER_FLAX;
                     }
                     break;
 
-                case Constants.STATUS_DEATH_RECOVER:                    walkTo(Constants.flaxTile);
+                case Constants.STATUS_DEATH_RECOVER:
+                    walkTo(Constants.flaxTile);
                     currentStatus = Constants.STATUS_GATHER_FLAX;
                     break;
 
@@ -111,18 +114,18 @@ public class FlaxPicker extends Script implements MessageListening07 {
      * initializes the flax picker and sets the status to the next required action.
      */
     public void init() {
-        if(Camera.getCameraAngle() < 90) {
+        if (Camera.getCameraAngle() < 90) {
             Camera.setCameraAngle(90);
         }
 
         //Next action depends on where we are located and the contents of our inventory
-        switch(locatePlayer()) {
+        switch (locatePlayer()) {
             case Constants.bankAreaInt:
-                if(Inventory.isFull()) {
+                if (Inventory.isFull()) {
                     currentStatus = Constants.STATUS_NOTE_BOWSTRINGS;
                 } else {
                     //Check for noted bowstrings and trade if they exist, otherwise gather flax.
-                    if(Inventory.find(Constants.notedBowStringId).length > 0) {
+                    if (Inventory.find(Constants.notedBowStringId).length > 0) {
                         currentStatus = Constants.STATUS_TRADE_MASTER;
                     } else {
                         currentStatus = Constants.STATUS_GATHER_FLAX;
@@ -131,7 +134,7 @@ public class FlaxPicker extends Script implements MessageListening07 {
                 break;
 
             case Constants.flaxAreaInt:
-                if(!Inventory.isFull()) {
+                if (!Inventory.isFull()) {
                     currentStatus = Constants.STATUS_GATHER_FLAX;
                 } else {
                     currentStatus = Constants.STATUS_SPIN_FLAX;
@@ -139,8 +142,8 @@ public class FlaxPicker extends Script implements MessageListening07 {
                 break;
 
             case Constants.seersVillageAreaInt:
-                if(Inventory.isFull()) {
-                    if(Inventory.getCount(Constants.bowStringId) != 28) {
+                if (Inventory.isFull()) {
+                    if (Inventory.getCount(Constants.bowStringId) != 28) {
                         currentStatus = Constants.STATUS_SPIN_FLAX;
                     } else {
                         currentStatus = Constants.STATUS_NOTE_BOWSTRINGS;
@@ -173,18 +176,19 @@ public class FlaxPicker extends Script implements MessageListening07 {
 
     /**
      * Checks all known areas for the player and returns its corresponding area integer Id.
+     *
      * @return Area Id as integer.
      */
     public int locatePlayer() {
-        if(Constants.seersBankArea.contains(Player.getRSPlayer())) {
+        if (Constants.seersBankArea.contains(Player.getRSPlayer())) {
             return Constants.bankAreaInt;
-        } else if(Constants.seersFlaxArea.contains(Player.getRSPlayer())) {
+        } else if (Constants.seersFlaxArea.contains(Player.getRSPlayer())) {
             return Constants.flaxAreaInt;
-        } else if(Constants.seersVillageArea.contains(Player.getRSPlayer())) {
+        } else if (Constants.seersVillageArea.contains(Player.getRSPlayer())) {
             return Constants.seersVillageAreaInt;
-        } else if(Constants.spinningArea.contains(Player.getRSPlayer())) {
+        } else if (Constants.spinningArea.contains(Player.getRSPlayer())) {
             return Constants.spinningAreaInt;
-        } else if(Constants.lumbridgeArea.contains(Player.getRSPlayer())) {
+        } else if (Constants.lumbridgeArea.contains(Player.getRSPlayer())) {
             return Constants.lumbridgeAreaInt;
         }
         return -1;
@@ -208,6 +212,7 @@ public class FlaxPicker extends Script implements MessageListening07 {
 
     /**
      * Sends trade request to master and trades noted bowstrings. Returns false if trade fails
+     *
      * @return
      */
     public boolean tradeMaster() {
@@ -216,14 +221,61 @@ public class FlaxPicker extends Script implements MessageListening07 {
 
     /**
      * Gathers flax until inventory is full, assumes that player is located in flax area.
+     *
      * @return
      */
     public boolean gatherFlax() {
-        return true;
+        if (Inventory.find(Constants.flaxId).length == 28)
+            return true;
+        else {
+            final RSObject[] flaxes = Objects.findNearest(50, "Flax");
+            if (flaxes.length < 1)
+                return false;
+
+            if (!flaxes[0].isOnScreen()) {
+                // The nearest flax is not on the screen. Let's walk to it.
+
+                if (!Walking.walkPath(Walking.generateStraightPath(flaxes[0])))
+                    // We could not walk to the flax. Let's exit so we don't try
+                    // clicking a flax which isn't on screen.
+                    return false;
+
+                if (!Timing.waitCondition(new Condition() {
+                    // We will now use the Timing API to wait until the flax is on
+                    // the screen (we are probably walking to the flax right now).
+
+                    @Override
+                    public boolean active() {
+                        General.sleep(100); // Sleep to reduce CPU usage.
+
+                        return flaxes[0].isOnScreen();
+                    }
+
+                }, General.random(8000, 9300)))
+                    // A flax could not be found before the timeout of 8-9.3
+                    // seconds. Let's exit the method and return false. we don't
+                    // want to end up trying to click a flax which isn't on the
+                    // screen.
+                    return false;
+            }
+
+            // Okay, now we are sure flaxes[0] is on-screen. Let's click it. We may
+            // be still moving at this moment, so let's use DynamicClicking.
+            // DynamicClicking should be used when your character is moving, or the
+            // target is moving, and you need to click the target.
+
+            if (!DynamicClicking.clickRSObject(flaxes[0], "Pick"))
+                return false;
+            else
+                sleep(750, 1250);
+        }
+
+        return false;
     }
 
     /**
      * Spins flax in seers village until no flax remains in inventory. assumes player is in spinning area.
+     *
      * @return
      */
     public boolean spinFlax() {
@@ -247,7 +299,7 @@ public class FlaxPicker extends Script implements MessageListening07 {
     }
 
 
-    public static void useLadder(int ladderID, String action, RSArea endArea) {
+    public static void useLadder(int ladderID, String action, final RSArea endArea) {
         RSObject[] ladderObject = Objects.findNearest(20, ladderID);
         //While found ladder
         while (ladderObject.length > 0) {

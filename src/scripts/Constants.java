@@ -1,4 +1,4 @@
-package src.scripts;
+package scripts;
 
 import org.tribot.api2007.types.RSArea;
 import org.tribot.api2007.types.RSTile;
@@ -32,8 +32,8 @@ public class Constants {
     public static final RSTile spinLadderTile = new RSTile(2715, 3471);
 
     /* Area Ids */
-    public static final RSArea seersBankArea = new RSArea(new RSTile(2720, 3491), new RSTile(2720, 3498));
-    public static final RSArea seersFlaxArea = new RSArea(new RSTile(2736, 3435), new RSTile(2752, 3454));
+    public static final RSArea seersBankArea = new RSArea(new RSTile(2731, 3486), new RSTile(2718, 3494));
+    public static final RSArea seersFlaxArea = new RSArea(new RSTile(2744, 3445), new RSTile(2735, 3454));
     public static final RSArea seersVillageArea = new RSArea(new RSTile(2662, 3511), new RSTile(2785, 3435));
     public static final RSArea lumbridgeArea = new RSArea(new RSTile(3191, 3196), new RSTile(3246, 3241));
     public static final RSArea spinningArea = new RSArea(new RSTile(2710, 3473, 1), new RSTile(2714, 3471, 1));
@@ -46,4 +46,7 @@ public class Constants {
     public static final int seersVillageAreaInt = 4;
     public static final int lumbridgeAreaInt = 5;
     public static final int lowerSpinningAreaInt = 6;
+
+    /* Item Ids */
+    public static final int flaxId = 1779;
 }
