@@ -75,9 +75,10 @@ public class FlaxPicker extends Script implements MessageListening07 {
                     break;
 
                 case Constants.STATUS_SPIN_FLAX:
-                    PathNavigator navi = new PathNavigator();
                     if (!Constants.spinningArea.contains(Player.getRSPlayer())) {
-                        navi.traverse(Constants.spinLadderTile);
+                        walkTo(Constants.spinningDoorTile);
+                        openDoorIfClosed(Objects.findNearest(20, Constants.spinningDoor));
+                        walkTo(Constants.spinLadderTile);
                         useLadder(Constants.spinningLadderBottom, "Climb-up", Constants.spinningArea);
                     } else {
                         println("In spinning area...");
@@ -85,7 +86,8 @@ public class FlaxPicker extends Script implements MessageListening07 {
 
                     if (spinFlax()) {
                         useLadder(Constants.spinningLadderTop, "Climb-down", Constants.lowerSpinningArea);
-                        navi.traverse(Constants.bankTile);
+                        openDoorIfClosed(Objects.findNearest(20, Constants.spinningDoor));
+                        walkTo(Constants.bankTile);
                         currentStatus = Constants.STATUS_NOTE_BOWSTRINGS;
                     }
                     break;
@@ -518,5 +520,13 @@ public class FlaxPicker extends Script implements MessageListening07 {
         return false;
     }
 
+    public void openDoorIfClosed(int doorId) {
+        RSObject[] door = Objects.findNearest(20, doorId);
+        while(door.length > 0) {
+            DynamicClicking.clickRSModel(door[0].getModel(), "Open");
+            sleep(200, 300);
+            door = Objects.findNearest(20, doorId);
+        }
+    }
 
 }

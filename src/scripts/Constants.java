@@ -12,7 +12,7 @@ public class Constants {
     public static final int spinningLadderBottom = 25938;
     public static final int spinningLadderTop = 25939;
     public static final int spinningWheel = 25824;
-
+    public static final int spinningDoor = 916;
 
     /* Slave Status Ids */
     public static final int STATUS_INIT = 1;
@@ -27,6 +27,7 @@ public class Constants {
     public static final RSTile flaxTile = new RSTile(2742, 3446, 0);
     public static final RSTile bankTile = new RSTile(2725, 3492, 0);
     public static final RSTile spinLadderTile = new RSTile(2715, 3471);
+    public static final RSTile spinningDoorTile = new RSTile( 2716, 3472, 0);
 
     /* Area Ids */
     public static final RSArea seersBankArea = new RSArea(new RSTile(2731, 3486), new RSTile(2718, 3494));
