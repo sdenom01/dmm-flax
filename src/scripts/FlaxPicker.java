@@ -1,14 +1,20 @@
-package scripts;
+package src.scripts;
 
+import org.tribot.api.DynamicClicking;
 import org.tribot.api.General;
-import org.tribot.api2007.Camera;
-import org.tribot.api2007.Inventory;
-import org.tribot.api2007.Player;
-import org.tribot.api2007.WebWalking;
+import org.tribot.api.Timing;
+import org.tribot.api.input.Mouse;
+import org.tribot.api.types.generic.Condition;
+import org.tribot.api2007.*;
+import org.tribot.api2007.types.RSArea;
+import org.tribot.api2007.types.RSObject;
 import org.tribot.api2007.types.RSTile;
+import org.tribot.api2007.util.PathNavigator;
 import org.tribot.script.Script;
 import org.tribot.script.ScriptManifest;
 import org.tribot.script.interfaces.MessageListening07;
+
+import java.awt.*;
 
 @ScriptManifest(authors = {"Xuubasa, Zope, tsh"}, name = "FlaxPicker", category = "DMM-Flax", version = 1.0, description = "Picks Flax and spins it into bowstrings in seers village before noting and trading to 'mule' bot.")
 public class FlaxPicker extends Script implements MessageListening07 {
@@ -65,10 +71,14 @@ public class FlaxPicker extends Script implements MessageListening07 {
                     break;
 
                 case Constants.STATUS_SPIN_FLAX:
+                    PathNavigator navi = new PathNavigator();
                     if(!Constants.spinningArea.contains(Player.getRSPlayer())) {
-                        walkTo(Constants.spinLadderTile);
+                        navi.traverse(Constants.spinLadderTile);
+                        useLadder(Constants.spinningLadder, "Climb-up", Constants.spinningArea);
                     }
                     if(spinFlax()) {
+                        useLadder(Constants.spinningLadder, "Climb-down", Constants.lowerSpinningArea);
+                        navi.traverse(Constants.bankTile);
                         currentStatus = Constants.STATUS_NOTE_BOWSTRINGS;
                     }
                     break;
@@ -141,6 +151,7 @@ public class FlaxPicker extends Script implements MessageListening07 {
                 break;
 
             case Constants.spinningAreaInt:
+            case Constants.lowerSpinningAreaInt:
                 if(Inventory.getCount(Constants.bowStringId) != 28) {
                     currentStatus = Constants.STATUS_SPIN_FLAX;
                 } else {
@@ -216,6 +227,67 @@ public class FlaxPicker extends Script implements MessageListening07 {
      * @return
      */
     public boolean spinFlax() {
+        RSObject[] spinningWheel = Objects.findNearest(20, Constants.spinningWheel);
+        if(spinningWheel.length > 0) {
+            DynamicClicking.clickRSModel(spinningWheel[0].getModel(), "Spin");
+            //Window Pops up
+            if(clickObject(spinningWheel[0], "Spin", 3, 10)){
+                long t = System.currentTimeMillis();
+                while((Interfaces.get(459, 91) == null || Interfaces.get(459, 91).getParentID() != -1) && Timing.timeFromMark(t) < 2000){
+                    sleep(10);
+                }
+            }
+
+        } else {
+            General.println("Could not find spinning wheel.");
+            return false;
+        }
+
         return true;
+    }
+
+
+    public static void useLadder(int ladderID, String action, RSArea endArea) {
+        RSObject[] ladderObject = Objects.findNearest(20, ladderID);
+        //While found ladder
+        while (ladderObject.length > 0) {
+            General.println("Found Ladder: " + ladderID + ", Attempting to " + action);
+            DynamicClicking.clickRSModel(ladderObject[0].getModel(), action);
+            Timing.waitCondition(new Condition() {
+                @Override
+                public boolean active() {
+                    return endArea.contains(Player.getRSPlayer());
+                }
+            }, 2000);
+            ladderObject = Objects.findNearest(20, ladderID);
+        }
+        General.println("Finished ladder interaction.");
+    }
+
+    private boolean clickObject(RSObject object, String option, int randomx, int randomy){
+        try{
+            if(object != null && object.isOnScreen() && object.getModel() != null){
+                Point x = object.getModel().getCentrePoint();
+                int x1 = (int) x.getX() + General.random(randomx, -randomx);
+                int x2 = (int) x.getY() + General.random(randomy, -randomy);
+                int tries = 0;
+                while((int) Mouse.getPos().getX() != x1 && (int)Mouse.getPos().getY() != x2 && tries < 30) {
+                    Mouse.move(x1, x2);
+                    tries++;
+                }
+                Mouse.click(x1, x2, 3);
+                if(ChooseOption.isOpen()){
+                    if(ChooseOption.isOptionValid(option)){
+                        ChooseOption.select(option);
+                        return true;
+                    } else {
+                        Mouse.move((int)Mouse.getPos().getX() + General.random(15, 25),(int) Mouse.getPos().getY() + General.random(-60, -80));
+                    }
+                }
+            }
+        } catch (NullPointerException e){
+            System.out.print("Your computer sux, recovered from nullpointer");
+        }
+        return false;
     }
 }
