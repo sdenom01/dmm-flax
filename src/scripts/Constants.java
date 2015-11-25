@@ -13,7 +13,8 @@ public class Constants {
 
 
     /* Object Ids */
-    public static final int spinningLadder = 25938;
+    public static final int spinningLadderBottom = 25938;
+    public static final int spinningLadderTop = 25939;
     public static final int spinningWheel = 25824;
 
 

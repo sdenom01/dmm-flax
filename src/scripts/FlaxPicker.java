@@ -1,15 +1,6 @@
 package scripts;
 
-import com.sun.tools.internal.jxc.ap.Const;
 import org.tribot.api.Clicking;
-import org.tribot.api.General;
-import org.tribot.api.Timing;
-import org.tribot.api.types.generic.Condition;
-import org.tribot.api2007.*;
-import org.tribot.api2007.types.RSObject;
-import org.tribot.api2007.types.RSPlayer;
-import org.tribot.api2007.types.RSTile;
-import org.tribot.api2007.types.RSItem;
 import org.tribot.api.DynamicClicking;
 import org.tribot.api.General;
 import org.tribot.api.Timing;
@@ -17,15 +8,11 @@ import org.tribot.api.input.Keyboard;
 import org.tribot.api.input.Mouse;
 import org.tribot.api.types.generic.Condition;
 import org.tribot.api2007.*;
-import org.tribot.api2007.types.RSArea;
-import org.tribot.api2007.types.RSInterface;
-import org.tribot.api2007.types.RSObject;
-import org.tribot.api2007.types.RSTile;
+import org.tribot.api2007.types.*;
 import org.tribot.api2007.util.PathNavigator;
 import org.tribot.script.Script;
 import org.tribot.script.ScriptManifest;
 import org.tribot.script.interfaces.MessageListening07;
-import scripts.Constants;
 
 import java.awt.*;
 
@@ -89,13 +76,13 @@ public class FlaxPicker extends Script implements MessageListening07 {
                     PathNavigator navi = new PathNavigator();
                     if (!Constants.spinningArea.contains(Player.getRSPlayer())) {
                         navi.traverse(Constants.spinLadderTile);
-                        useLadder(Constants.spinningLadder, "Climb-up", Constants.spinningArea);
+                        useLadder(Constants.spinningLadderBottom, "Climb-up", Constants.spinningArea);
                     } else {
                         println("In spinning area...");
                     }
 
                     if (spinFlax()) {
-                        useLadder(Constants.spinningLadder, "Climb-down", Constants.lowerSpinningArea);
+                        useLadder(Constants.spinningLadderTop, "Climb-down", Constants.lowerSpinningArea);
                         navi.traverse(Constants.bankTile);
                         currentStatus = Constants.STATUS_NOTE_BOWSTRINGS;
                     }
@@ -357,11 +344,14 @@ public class FlaxPicker extends Script implements MessageListening07 {
         // DynamicClicking should be used when your character is moving, or the
         // target is moving, and you need to click the target.
 
-        if (!DynamicClicking.clickRSObject(flaxes[0], "Pick"))
-            return false;
-        else
-            sleep(750, 1250);
-
+        if (!Inventory.isFull()) {
+            if (!DynamicClicking.clickRSObject(flaxes[0], "Pick"))
+                return false;
+            else
+                sleep(750, 1250);
+        } else {
+            return true;
+        }
         return false;
     }
 
