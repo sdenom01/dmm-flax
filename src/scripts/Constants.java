@@ -36,7 +36,7 @@ public class Constants {
     public static final RSArea seersFlaxArea = new RSArea(new RSTile(2744, 3445), new RSTile(2735, 3454));
     public static final RSArea seersVillageArea = new RSArea(new RSTile(2662, 3511), new RSTile(2785, 3435));
     public static final RSArea lumbridgeArea = new RSArea(new RSTile(3191, 3196), new RSTile(3246, 3241));
-    public static final RSArea spinningArea = new RSArea(new RSTile(2710, 3473, 1), new RSTile(2714, 3471, 1));
+    public static final RSArea spinningArea = new RSArea(new RSTile(2714, 3469, 1), new RSTile(2710, 3473, 1));
     public static final RSArea lowerSpinningArea = new RSArea(new RSTile(2710, 3473, 0), new RSTile(2714, 3471, 0));
 
     /* Corresponding integer identifiers for Areas */

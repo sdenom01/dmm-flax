@@ -66,6 +66,7 @@ public class FlaxPicker extends Script implements MessageListening07 {
                     if (!Constants.seersFlaxArea.contains(Player.getRSPlayer())) {
                         walkTo(Constants.flaxTile);
                     }
+
                     if (gatherFlax()) {
                         currentStatus = Constants.STATUS_SPIN_FLAX;
                     }
@@ -73,12 +74,12 @@ public class FlaxPicker extends Script implements MessageListening07 {
 
                 case Constants.STATUS_SPIN_FLAX:
                     PathNavigator navi = new PathNavigator();
-                    if(!Constants.spinningArea.contains(Player.getRSPlayer())) {
+                    if (!Constants.spinningArea.contains(Player.getRSPlayer())) {
                         navi.traverse(Constants.spinLadderTile);
                         useLadder(Constants.spinningLadder, "Climb-up", Constants.spinningArea);
                     }
 
-                    if(spinFlax()) {
+                    if (spinFlax()) {
                         useLadder(Constants.spinningLadder, "Climb-down", Constants.lowerSpinningArea);
                         navi.traverse(Constants.bankTile);
                         currentStatus = Constants.STATUS_NOTE_BOWSTRINGS;
@@ -155,7 +156,7 @@ public class FlaxPicker extends Script implements MessageListening07 {
 
             case Constants.spinningAreaInt:
             case Constants.lowerSpinningAreaInt:
-                if(Inventory.getCount(Constants.bowStringId) != 28) {
+                if (Inventory.getCount(Constants.bowStringId) != 28) {
                     currentStatus = Constants.STATUS_SPIN_FLAX;
                 } else {
                     currentStatus = Constants.STATUS_NOTE_BOWSTRINGS;
@@ -225,50 +226,46 @@ public class FlaxPicker extends Script implements MessageListening07 {
      * @return
      */
     public boolean gatherFlax() {
-        if (Inventory.find(Constants.flaxId).length == 28)
-            return true;
-        else {
-            final RSObject[] flaxes = Objects.findNearest(50, "Flax");
-            if (flaxes.length < 1)
+        final RSObject[] flaxes = Objects.findNearest(50, "Flax");
+        if (flaxes.length < 1)
+            return false;
+
+        if (!flaxes[0].isOnScreen()) {
+            // The nearest flax is not on the screen. Let's walk to it.
+
+            if (!Walking.walkPath(Walking.generateStraightPath(flaxes[0])))
+                // We could not walk to the flax. Let's exit so we don't try
+                // clicking a flax which isn't on screen.
                 return false;
 
-            if (!flaxes[0].isOnScreen()) {
-                // The nearest flax is not on the screen. Let's walk to it.
+            if (!Timing.waitCondition(new Condition() {
+                // We will now use the Timing API to wait until the flax is on
+                // the screen (we are probably walking to the flax right now).
 
-                if (!Walking.walkPath(Walking.generateStraightPath(flaxes[0])))
-                    // We could not walk to the flax. Let's exit so we don't try
-                    // clicking a flax which isn't on screen.
-                    return false;
+                @Override
+                public boolean active() {
+                    General.sleep(100); // Sleep to reduce CPU usage.
 
-                if (!Timing.waitCondition(new Condition() {
-                    // We will now use the Timing API to wait until the flax is on
-                    // the screen (we are probably walking to the flax right now).
+                    return flaxes[0].isOnScreen();
+                }
 
-                    @Override
-                    public boolean active() {
-                        General.sleep(100); // Sleep to reduce CPU usage.
-
-                        return flaxes[0].isOnScreen();
-                    }
-
-                }, General.random(8000, 9300)))
-                    // A flax could not be found before the timeout of 8-9.3
-                    // seconds. Let's exit the method and return false. we don't
-                    // want to end up trying to click a flax which isn't on the
-                    // screen.
-                    return false;
-            }
-
-            // Okay, now we are sure flaxes[0] is on-screen. Let's click it. We may
-            // be still moving at this moment, so let's use DynamicClicking.
-            // DynamicClicking should be used when your character is moving, or the
-            // target is moving, and you need to click the target.
-
-            if (!DynamicClicking.clickRSObject(flaxes[0], "Pick"))
+            }, General.random(8000, 9300)))
+                // A flax could not be found before the timeout of 8-9.3
+                // seconds. Let's exit the method and return false. we don't
+                // want to end up trying to click a flax which isn't on the
+                // screen.
                 return false;
-            else
-                sleep(750, 1250);
         }
+
+        // Okay, now we are sure flaxes[0] is on-screen. Let's click it. We may
+        // be still moving at this moment, so let's use DynamicClicking.
+        // DynamicClicking should be used when your character is moving, or the
+        // target is moving, and you need to click the target.
+
+        if (!DynamicClicking.clickRSObject(flaxes[0], "Pick"))
+            return false;
+        else
+            sleep(750, 1250);
 
         return false;
     }
@@ -280,12 +277,12 @@ public class FlaxPicker extends Script implements MessageListening07 {
      */
     public boolean spinFlax() {
         RSObject[] spinningWheel = Objects.findNearest(20, Constants.spinningWheel);
-        if(spinningWheel.length > 0) {
+        if (spinningWheel.length > 0) {
             DynamicClicking.clickRSModel(spinningWheel[0].getModel(), "Spin");
             //Window Pops up
-            if(clickObject(spinningWheel[0], "Spin", 3, 10)){
+            if (clickObject(spinningWheel[0], "Spin", 3, 10)) {
                 long t = System.currentTimeMillis();
-                while((Interfaces.get(459, 91) == null || Interfaces.get(459, 91).getParentID() != -1) && Timing.timeFromMark(t) < 2000){
+                while ((Interfaces.get(459, 90) == null || Interfaces.get(459, 90).getParentID() != -1) && Timing.timeFromMark(t) < 2000) {
                     sleep(10);
                 }
             }
@@ -313,31 +310,32 @@ public class FlaxPicker extends Script implements MessageListening07 {
             }, 2000);
             ladderObject = Objects.findNearest(20, ladderID);
         }
+
         General.println("Finished ladder interaction.");
     }
 
-    private boolean clickObject(RSObject object, String option, int randomx, int randomy){
-        try{
-            if(object != null && object.isOnScreen() && object.getModel() != null){
+    private boolean clickObject(RSObject object, String option, int randomx, int randomy) {
+        try {
+            if (object != null && object.isOnScreen() && object.getModel() != null) {
                 Point x = object.getModel().getCentrePoint();
                 int x1 = (int) x.getX() + General.random(randomx, -randomx);
                 int x2 = (int) x.getY() + General.random(randomy, -randomy);
                 int tries = 0;
-                while((int) Mouse.getPos().getX() != x1 && (int)Mouse.getPos().getY() != x2 && tries < 30) {
+                while ((int) Mouse.getPos().getX() != x1 && (int) Mouse.getPos().getY() != x2 && tries < 30) {
                     Mouse.move(x1, x2);
                     tries++;
                 }
                 Mouse.click(x1, x2, 3);
-                if(ChooseOption.isOpen()){
-                    if(ChooseOption.isOptionValid(option)){
+                if (ChooseOption.isOpen()) {
+                    if (ChooseOption.isOptionValid(option)) {
                         ChooseOption.select(option);
                         return true;
                     } else {
-                        Mouse.move((int)Mouse.getPos().getX() + General.random(15, 25),(int) Mouse.getPos().getY() + General.random(-60, -80));
+                        Mouse.move((int) Mouse.getPos().getX() + General.random(15, 25), (int) Mouse.getPos().getY() + General.random(-60, -80));
                     }
                 }
             }
-        } catch (NullPointerException e){
+        } catch (NullPointerException e) {
             System.out.print("Your computer sux, recovered from nullpointer");
         }
         return false;
