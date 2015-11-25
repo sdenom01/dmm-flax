@@ -223,12 +223,16 @@ public class FlaxPicker extends Script implements MessageListening07 {
      * Notes bowstrings in inventory, assumes player is located near a bank.
      */
     public void noteBowStrings() {
+        General.println("noting bowstrings");
         RSItem[] bowStrings = Inventory.find(Constants.bowStringId);
+        General.println(bowStrings);
+        General.println(locatePlayer());
         if(locatePlayer() == 1 && bowStrings.length > 0) {
+            General.println("we're in seers bank");
             // exchange bowstrings
-            RSObject[] nearestBankBooth = Objects.findNearest(70, 11744);
+            RSObject[] nearestBankBooth = Objects.findNearest(15, 25808);
             withdrawBowstrings(nearestBankBooth);
-        } else if(bowStrings.length > 0) {
+        } else if(bowStrings.length == 0) {
             // run to flax fields
             walkTo(Constants.flaxTile);
         } else if(locatePlayer() != 1) {
@@ -242,6 +246,7 @@ public class FlaxPicker extends Script implements MessageListening07 {
      * Withdraws noted bowstrings from bank.
      */
     private static void withdrawBowstrings(RSObject[] bankBooth) {
+        General.println("withdrawBowstrings");
         Clicking.click("Bank Bank booth", bankBooth[0]);
 
         Timing.waitCondition(new Condition() {
@@ -255,8 +260,9 @@ public class FlaxPicker extends Script implements MessageListening07 {
         if (Inventory.getAll().length > 0) {
             Banking.depositAll();
         }
+
         RSItem[] notedBowStrings = Inventory.find(Constants.notedBowStringId);
-        if (notedBowStrings.length > 0) {
+        if (notedBowStrings.length < 1) {
             // note items
             Clicking.click(Interfaces.get(12, 24));
             Banking.withdraw(0, Constants.bowStringId);
@@ -402,7 +408,7 @@ public class FlaxPicker extends Script implements MessageListening07 {
 
                 sleep(500, 750);
 
-                Keyboard.typeSend("" + General.random(28, 1000));
+                Keyboard.typeSend("" + General.random(28, 99));
                 sleep(750, 1250);
 
             }

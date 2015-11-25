@@ -8,8 +8,8 @@ import org.tribot.api2007.types.RSTile;
  */
 public class Constants {
     //TODO: These need actual values.
-    public static final int bowStringId = -1;
-    public static final int notedBowStringId = -1;
+    public static final int bowStringId = 1777;
+    public static final int notedBowStringId = 1778;
 
 
     /* Object Ids */
