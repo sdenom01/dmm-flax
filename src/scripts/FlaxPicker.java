@@ -1,14 +1,19 @@
 package scripts;
 
+import com.sun.tools.internal.jxc.ap.Const;
+import org.tribot.api.Clicking;
 import org.tribot.api.General;
-import org.tribot.api2007.Camera;
-import org.tribot.api2007.Inventory;
-import org.tribot.api2007.Player;
-import org.tribot.api2007.WebWalking;
+import org.tribot.api.Timing;
+import org.tribot.api.types.generic.Condition;
+import org.tribot.api2007.*;
+import org.tribot.api2007.types.RSObject;
+import org.tribot.api2007.types.RSPlayer;
 import org.tribot.api2007.types.RSTile;
+import org.tribot.api2007.types.RSItem
 import org.tribot.script.Script;
 import org.tribot.script.ScriptManifest;
 import org.tribot.script.interfaces.MessageListening07;
+import scripts.Constants;
 
 @ScriptManifest(authors = {"Xuubasa, Zope, tsh"}, name = "FlaxPicker", category = "DMM-Flax", version = 1.0, description = "Picks Flax and spins it into bowstrings in seers village before noting and trading to 'mule' bot.")
 public class FlaxPicker extends Script implements MessageListening07 {
@@ -192,7 +197,46 @@ public class FlaxPicker extends Script implements MessageListening07 {
      * Notes bowstrings in inventory, assumes player is located near a bank.
      */
     public void noteBowStrings() {
+        if(locatePlayer() == 1 && Inventory.find(Constants.bowStringId)) {
+            // exchange bowstrings
+            RSObject[] nearestBankBooth = Objects.findNearest(70, 11744);
+            withdrawBowstrings(nearestBankBooth);
+        } else if(! Inventory.find(Constants.bowStringId)) {
+            // run to flax fields
+            walkTo(Constants.flaxTile);
+        } else if(locatePlayer() != 1) {
+            // run to bank
+            walkTo(Constants.bankTile);
+        }
+    }
 
+
+    /**
+     * Withdraws noted bowstrings from bank.
+     */
+    private static void withdrawBowstrings(RSObject[] bankBooth) {
+        Clicking.click("Bank Bank booth", bankBooth[0]);
+
+        Timing.waitCondition(new Condition() {
+            @Override
+            public boolean active() {
+                return Banking.isBankScreenOpen();
+            }
+        }, 5000);
+
+        General.sleep(500);
+        if (Inventory.getAll().length > 0) {
+            Banking.depositAll();
+        }
+
+        if (! Inventory.find(Constants.notedBowStringId)) {
+            // note items
+            Clicking.click(Interfaces.get(12, 24));
+            Banking.withdraw(0, Constants.bowStringId);
+        }
+
+        General.sleep(400, 500);
+        Banking.close();
     }
 
     /**
@@ -200,6 +244,39 @@ public class FlaxPicker extends Script implements MessageListening07 {
      * @return
      */
     public boolean tradeMaster() {
+        // define mule names
+        String accountNames = "zsh";
+        RSPlayer[] mule = Players.findNearest(accountNames);
+        RSPlayer[] all = Players.getAll();
+
+        if (all.length > 0) {
+            for (RSPlayer r : all) {
+                if (r != null) {
+                    if (r.getDefinition() != null) {
+                        if (accountNames.contains(r.getName())) {
+                            if (r.isOnScreen()) {
+                                Clicking.click("Trade with " + accountNames, mule);
+                                General.sleep(1000,5000);
+
+                                if (Trading.getWindowState() == Trading.WINDOW_STATE.FIRST_WINDOW && accountNames.contains(Trading.getOpponentName())) {
+                                    Clicking.click("Offer-All", Constants.notedBowStringId);
+                                    //1st screen
+                                    Trading.accept();
+                                }
+                                if (Trading.getWindowState() == Trading.WINDOW_STATE.SECOND_WINDOW && accountNames.contains(Trading.getOpponentName())) {
+                                    Trading.accept();
+                                }
+                            } else {
+                                if (Player.getPosition().distanceTo(r) > 5) {
+                                    WebWalking.walkTo(r);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
         return true;
     }
 
