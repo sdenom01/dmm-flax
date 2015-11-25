@@ -13,10 +13,12 @@ import org.tribot.api2007.types.RSItem;
 import org.tribot.api.DynamicClicking;
 import org.tribot.api.General;
 import org.tribot.api.Timing;
+import org.tribot.api.input.Keyboard;
 import org.tribot.api.input.Mouse;
 import org.tribot.api.types.generic.Condition;
 import org.tribot.api2007.*;
 import org.tribot.api2007.types.RSArea;
+import org.tribot.api2007.types.RSInterface;
 import org.tribot.api2007.types.RSObject;
 import org.tribot.api2007.types.RSTile;
 import org.tribot.api2007.util.PathNavigator;
@@ -88,6 +90,8 @@ public class FlaxPicker extends Script implements MessageListening07 {
                     if (!Constants.spinningArea.contains(Player.getRSPlayer())) {
                         navi.traverse(Constants.spinLadderTile);
                         useLadder(Constants.spinningLadder, "Climb-up", Constants.spinningArea);
+                    } else {
+                        println("In spinning area...");
                     }
 
                     if (spinFlax()) {
@@ -361,23 +365,58 @@ public class FlaxPicker extends Script implements MessageListening07 {
      * @return
      */
     public boolean spinFlax() {
+        println("Starting to spin flax...");
         RSObject[] spinningWheel = Objects.findNearest(20, Constants.spinningWheel);
         if (spinningWheel.length > 0) {
             DynamicClicking.clickRSModel(spinningWheel[0].getModel(), "Spin");
             //Window Pops up
-            if (clickObject(spinningWheel[0], "Spin", 3, 10)) {
-                long t = System.currentTimeMillis();
-                while ((Interfaces.get(459, 90) == null || Interfaces.get(459, 90).getParentID() != -1) && Timing.timeFromMark(t) < 2000) {
-                    sleep(10);
-                }
+            if (spinningWheel[0].click("Spin")) {
+
+                final RSInterface[] bowStringInterface = {null};
+                final RSInterface[] amountInterface = {null};
+
+                Timing.waitCondition(new Condition() {
+                    @Override
+                    public boolean active() {
+                        println("Waiting for clickable interface..");
+                        sleep(50);
+                        bowStringInterface[0] = Interfaces.get(459, 92);
+                        return bowStringInterface[0] != null;
+                    }
+                }, 5000);
+
+                sleep(500, 750);
+
+                if (bowStringInterface[0] != null)
+                    bowStringInterface[0].click("Make X");
+
+                Timing.waitCondition(new Condition() {
+                    @Override
+                    public boolean active() {
+                        println("Waiting for input interface..");
+                        sleep(50);
+                        amountInterface[0] = Interfaces.get(162, 32);
+                        return amountInterface[0] != null;
+                    }
+                }, 5000);
+
+                sleep(500, 750);
+
+                Keyboard.typeSend("" + General.random(28, 1000));
+                sleep(750, 1250);
+
             }
 
             int flaxLeft = Inventory.getCount(Constants.flaxId);
-            while(flaxLeft > 0) {
-                if(isCurrentlySpinning()) {
-                    General.println(flaxLeft+" more flax to spin");
+            while (flaxLeft > 0) {
+                if (isCurrentlySpinning()) {
+                    General.println(flaxLeft + " more flax to spin");
                     sleep(50);
+                } else {
+                    println("Not spinning!");
+                    return false;
                 }
+
                 flaxLeft = Inventory.getCount(Constants.flaxId);
             }
 
@@ -453,4 +492,6 @@ public class FlaxPicker extends Script implements MessageListening07 {
 
         return false;
     }
+
+
 }
