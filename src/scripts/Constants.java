@@ -10,8 +10,12 @@ public class Constants {
     //TODO: These need actual values.
     public static final int bowStringId = -1;
     public static final int notedBowStringId = -1;
-    public static final RSTile spinLadderTile = new RSTile(-1, -1);
-    public static final RSArea spinningArea = new RSArea(new RSTile(-1, -1), new RSTile(-1, -1));
+
+
+    /* Object Ids */
+    public static final int spinningLadder = 25938;
+    public static final int spinningWheel = 25824;
+
 
     /* Slave Status Ids */
     public static final int STATUS_INIT = 1;
@@ -25,12 +29,15 @@ public class Constants {
     /* Tile Ids */
     public static final RSTile flaxTile = new RSTile(2742, 3446, 0);
     public static final RSTile bankTile = new RSTile(2725, 3492, 0);
+    public static final RSTile spinLadderTile = new RSTile(2715, 3471);
 
     /* Area Ids */
-    public static final RSArea seersBankArea = new RSArea(new RSTile(2720, 3491), new RSTile(2720, 3498));
-    public static final RSArea seersFlaxArea = new RSArea(new RSTile(2736, 3435), new RSTile(2752, 3454));
+    public static final RSArea seersBankArea = new RSArea(new RSTile(2731, 3486), new RSTile(2718, 3494));
+    public static final RSArea seersFlaxArea = new RSArea(new RSTile(2744, 3445), new RSTile(2735, 3454));
     public static final RSArea seersVillageArea = new RSArea(new RSTile(2662, 3511), new RSTile(2785, 3435));
     public static final RSArea lumbridgeArea = new RSArea(new RSTile(3191, 3196), new RSTile(3246, 3241));
+    public static final RSArea spinningArea = new RSArea(new RSTile(2714, 3469, 1), new RSTile(2710, 3473, 1));
+    public static final RSArea lowerSpinningArea = new RSArea(new RSTile(2710, 3473, 0), new RSTile(2714, 3471, 0));
 
     /* Corresponding integer identifiers for Areas */
     public static final int bankAreaInt = 1;
@@ -38,4 +45,8 @@ public class Constants {
     public static final int spinningAreaInt = 3;
     public static final int seersVillageAreaInt = 4;
     public static final int lumbridgeAreaInt = 5;
+    public static final int lowerSpinningAreaInt = 6;
+
+    /* Item Ids */
+    public static final int flaxId = 1779;
 }
