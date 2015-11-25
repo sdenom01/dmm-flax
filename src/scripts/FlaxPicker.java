@@ -287,6 +287,15 @@ public class FlaxPicker extends Script implements MessageListening07 {
                 }
             }
 
+            int flaxLeft = Inventory.getCount(Constants.flaxId);
+            while(flaxLeft > 0) {
+                if(isCurrentlySpinning()) {
+                    General.println(flaxLeft+" more flax to spin");
+                    sleep(50);
+                }
+                flaxLeft = Inventory.getCount(Constants.flaxId);
+            }
+
         } else {
             General.println("Could not find spinning wheel.");
             return false;
@@ -338,6 +347,25 @@ public class FlaxPicker extends Script implements MessageListening07 {
         } catch (NullPointerException e) {
             System.out.print("Your computer sux, recovered from nullpointer");
         }
+        return false;
+    }
+
+    /**
+     * This method compares the players starting crafting experience and keeps track of it to help us know if we are charging
+     */
+    private boolean isCurrentlySpinning() {
+        int startXp = Skills.getXP(Skills.SKILLS.CRAFTING);
+        long t = System.currentTimeMillis();
+        // Wait for 3 seconds before timing out...
+        while (Timing.timeFromMark(t) < 4250) {
+            if (Skills.getXP(Skills.SKILLS.CRAFTING) > startXp) {
+                // If we gained exp...
+                return true;
+            }
+
+            sleep(100);
+        }
+
         return false;
     }
 }
