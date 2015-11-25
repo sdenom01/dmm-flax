@@ -1,4 +1,4 @@
-package src.scripts;
+package scripts;
 
 import org.tribot.api2007.types.RSArea;
 import org.tribot.api2007.types.RSTile;

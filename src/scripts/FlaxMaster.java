@@ -1,3 +1,5 @@
+package scripts;
+
 import org.tribot.api.Clicking;
 import org.tribot.api.General;
 import org.tribot.api.Timing;

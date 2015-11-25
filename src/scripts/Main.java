@@ -1,4 +1,4 @@
-package src.scripts;
+package scripts;
 
 public class Main {
 
